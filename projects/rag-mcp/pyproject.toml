@@ -1,0 +1,12 @@
+[project]
+name = "rag-mcp"
+version = "0.1.0"
+description = "Enterprise RAG MCP server with hybrid retrieval & Ragas evaluation"
+requires-python = ">=3.11"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rag_mcp"]
