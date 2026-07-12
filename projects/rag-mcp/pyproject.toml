@@ -3,6 +3,19 @@ name = "rag-mcp"
 version = "0.1.0"
 description = "Enterprise RAG MCP server with hybrid retrieval & Ragas evaluation"
 requires-python = ">=3.11"
+dependencies = [
+    "fastembed==0.8.0",
+    "fastmcp==3.4.4",
+    "httpx==0.28.1",
+    "langchain==1.3.13",
+    "langchain-mcp-adapters==0.3.0",
+    "langchain-qdrant==1.1.0",
+    "openai==2.45.0",
+    "pypdf==6.14.2",
+    "qdrant-client==1.18.0",
+    "ragas==0.4.3",
+    "tenacity==9.1.4",
+]
 
 [build-system]
 requires = ["hatchling"]
