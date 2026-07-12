@@ -1,0 +1,2 @@
+# Placeholder so data/ is kept in git. Untrusted NASA NTRS PDFs are downloaded
+# here at runtime and are gitignored. See tasks/PLAN.md §5.1 and .gitignore.
