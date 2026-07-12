@@ -1,0 +1,3 @@
+# Placeholder so evaluation/reports/ is kept in git. Report contents (JSON/MD/HTML)
+# are gitignored — they may carry injected text from retrieved NASA chunks.
+# See tasks/PLAN.md §5.4 and .gitignore.
