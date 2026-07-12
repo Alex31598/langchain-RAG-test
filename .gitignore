@@ -1,0 +1,37 @@
+# Secrets
+.env
+*.env
+!.env.example
+
+# RAG data (untrusted NASA PDFs) + evaluation reports (may carry injected text)
+projects/rag-mcp/data/
+projects/rag-mcp/evaluation/reports/
+*.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# uv
+# uv.lock IS committed (lockfile). Do not ignore it.
+
+# Docker volumes (local)
+qdrant-data/
+ollama-models/
+
+# Task notes (local planning docs, not shipped)
+tasks/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
