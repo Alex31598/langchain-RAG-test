@@ -3,6 +3,14 @@ name = "telemetry-mcp"
 version = "0.1.0"
 description = "Simulated telemetry MCP server & LangGraph diagnostic agent"
 requires-python = ">=3.11"
+dependencies = [
+    "fastmcp==3.4.4",
+    "httpx==0.28.1",
+    "langchain-mcp-adapters==0.3.0",
+    "langgraph==1.2.9",
+    "openai==2.45.0",
+    "pydantic==2.13.4",
+]
 
 [build-system]
 requires = ["hatchling"]
