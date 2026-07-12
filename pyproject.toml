@@ -28,9 +28,17 @@ select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM"]
 [tool.pytest.ini_options]
 testpaths = ["projects"]
 asyncio_mode = "auto"
+# Use importlib import mode so multiple project test dirs can share the same
+# basename (e.g. tests/test_smoke.py) without colliding on package identity.
+addopts = "--import-mode=importlib"
 
 [tool.mypy]
 python_version = "3.11"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
+# Exclude per-project tests/ dirs from the broad `mypy .` run: both projects
+# ship tests/__init__.py (per M0.2/M0.3), which mypy maps to a duplicate module
+# named "tests". pytest avoids the same collision via --import-mode=importlib
+# above. Test files are type-checked per-project as they grow real type surface.
+exclude = ['projects/.*/tests/']
