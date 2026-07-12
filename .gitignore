@@ -4,8 +4,11 @@
 !.env.example
 
 # RAG data (untrusted NASA PDFs) + evaluation reports (may carry injected text)
-projects/rag-mcp/data/
-projects/rag-mcp/evaluation/reports/
+# Keep the dirs in git via .gitkeep, but ignore all real contents.
+projects/rag-mcp/data/*
+!projects/rag-mcp/data/.gitkeep
+projects/rag-mcp/evaluation/reports/*
+!projects/rag-mcp/evaluation/reports/.gitkeep
 *.pdf
 
 # Python
