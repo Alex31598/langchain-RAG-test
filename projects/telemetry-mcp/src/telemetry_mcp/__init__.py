@@ -1,0 +1,1 @@
+"""Telemetry MCP server package."""
