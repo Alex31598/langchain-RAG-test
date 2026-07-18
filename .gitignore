@@ -22,6 +22,9 @@ venv/
 *.egg-info/
 dist/
 build/
+.coverage
+htmlcov/
+coverage.xml
 
 # uv
 # uv.lock IS committed (lockfile). Do not ignore it.
