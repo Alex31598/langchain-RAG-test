@@ -5,7 +5,8 @@
 :func:`tick`, emits timestamped :class:`SensorReading` log lines into a bounded
 ring buffer, and mutates state via :meth:`apply_command` — which routes the
 range + precondition decision through :func:`telemetry_mcp.safety.validate_command`
-(no mutation happens without safety's approval).
+(no mutation happens without safety's approval, and every decision is audited
+with the caller principal).
 
 See ``tasks/PLAN.md`` §4.1, §4.2 and ``tasks/M1-telemetry-mcp/02-simulator.md``.
 """
@@ -23,13 +24,12 @@ from telemetry_mcp.models import (
     SUBSYSTEMS,
     Command,
     CommandResult,
-    Decision,
     Health,
     SensorReading,
     Subsystem,
     SubsystemStatus,
 )
-from telemetry_mcp.safety import validate_command
+from telemetry_mcp.safety import AuditLog, validate_command
 
 if TYPE_CHECKING:
     from telemetry_mcp.scenarios import Scenario
@@ -122,7 +122,6 @@ class AcceleratorSimulator:
         self._buffer: deque[SensorReading] = deque(maxlen=buffer_cap)
         self._clock: datetime = _START_EPOCH
         self._lock = threading.Lock()
-        self._audit_counter = 0
         # Per-sensor setpoints (what a command moves) seeded to nominal.
         self._setpoints: dict[Subsystem, dict[str, float]] = {
             sub: {d.name: d.nominal for d in defs} for sub, defs in _SENSOR_DEFS.items()
@@ -235,31 +234,31 @@ class AcceleratorSimulator:
 
     # ------------------------------------------------------------ commands
 
-    def apply_command(self, cmd: Command) -> CommandResult:
-        """Validate ``cmd`` via safety and mutate state iff it is accepted.
+    def apply_command(
+        self, cmd: Command, principal: str, audit_log: AuditLog
+    ) -> CommandResult:
+        """Validate ``cmd`` via safety, audit the decision, and mutate iff accepted.
 
-        Range and precondition checks are delegated to
-        :func:`telemetry_mcp.safety.validate_command`; this method never
-        rejects a command on its own.
+        Builds the live sensor snapshot under ``self._lock``, routes the command
+        through :func:`telemetry_mcp.safety.validate_command` (which runs the
+        pure interlocks, writes an :class:`AuditEntry` with ``principal`` to
+        ``audit_log``, and returns a :class:`CommandResult`), and applies the
+        setpoint mutation only when ``result.accepted``. The validate + audit +
+        mutate sequence runs atomically under the lock so no other thread can
+        change the sensor state between the precondition check and the mutation
+        (no TOCTOU window). This method never rejects a command on its own --
+        all interlock decisions come from :mod:`telemetry_mcp.safety`.
         """
         with self._lock:
             snapshot: dict[Subsystem, dict[str, float]] = {
                 sub: {name: r.value for name, r in vals.items()}
                 for sub, vals in self._latest_reading.items()
             }
-            decision = validate_command(cmd, snapshot)
-            accepted = decision is Decision.accepted
-            if accepted:
+            result = validate_command(cmd, principal, snapshot, audit_log)
+            if result.accepted:
                 sensor_name = _PARAM_TO_SENSOR[cmd.subsystem][cmd.parameter]
                 self._setpoints[cmd.subsystem][sensor_name] = float(cmd.value)
-            self._audit_counter += 1
-            audit_id = f"audit-{self._audit_counter:08d}"
-            return CommandResult(
-                accepted=accepted,
-                decision=decision,
-                audit_id=audit_id,
-                timestamp=self._clock,
-            )
+            return result
 
     # ------------------------------------------------------------ helpers
 
